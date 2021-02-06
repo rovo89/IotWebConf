@@ -39,7 +39,7 @@ const char IOTWEBCONF_HTML_SCRIPT_INNER[] PROGMEM = "function c(l){document.getE
 const char IOTWEBCONF_HTML_HEAD_END[] PROGMEM     = "</head><body>";
 const char IOTWEBCONF_HTML_BODY_INNER[] PROGMEM   = "<div style='text-align:left;display:inline-block;min-width:260px;'>\n";
 const char IOTWEBCONF_HTML_FORM_START[] PROGMEM   = "<form action='' method='post'><input type='hidden' name='iotSave' value='true'>\n";
-const char IOTWEBCONF_HTML_FORM_END[] PROGMEM     = "<button type='submit'>Apply</button></form>\n";
+const char IOTWEBCONF_HTML_FORM_END[] PROGMEM     = "<button type='submit' style='margin-top: 10px;'>Apply</button></form>\n";
 const char IOTWEBCONF_HTML_SAVED[] PROGMEM        = "<div>Configuration saved<br />Return to <a href='/'>home page</a>.</div>\n";
 const char IOTWEBCONF_HTML_END[] PROGMEM          = "</div></body></html>";
 const char IOTWEBCONF_HTML_UPDATE[] PROGMEM       = "<div style='padding-top:25px;'><a href='{u}'>Firmware update</a></div>\n";
@@ -295,7 +295,7 @@ public:
    * If the method will return false, the configuration will not be saved.
    * Should be called before init()!
    */
-  void setFormValidator(std::function<bool()> func);
+  void setFormValidator(std::function<bool(WebRequestWrapper* webRequestWrapper)> func);
 
   /**
    * Specify your custom Access Point connection handler. Please use IotWebConf::connectAp() as
@@ -325,8 +325,11 @@ public:
    * By default the handler implementation returns with NULL, as seen on reference implementation
    * IotWebConf::handleConnectWifiFailure(). This means we need to fall back to AP mode.
    * If it method returns with a (new) WiFi settings, it is used as a next try.
-   * Note, that this feature is provided because of a possible future option of providing multiply
-   * WiFi settings.
+   * Note, that in case once you have returned with NULL, you might also want to
+   * resetWifiAuthInfo(), that sets the auth info used for the next time to the
+   * one set up in the admin portal.
+   * Note, that this feature is provided because of the option of providing multiple
+   * WiFi settings utilized by the MultipleWifiAddition class. (See IotWebConfMultipleWifi.h)
    */
   void setWifiConnectionFailedHandler( std::function<WifiAuthInfo*()> func )
   {
@@ -347,7 +350,7 @@ public:
    * but will NOT appear on the config portal.
    * Must be called before init()!
    */
-  void addHiddenParameter(Parameter* parameter);
+  void addHiddenParameter(ConfigItem* parameter);
 
   /**
    * Add a custom parameter group, that will be handled by the IotWebConf module.
@@ -355,7 +358,7 @@ public:
    * but will NOT appear on the config portal.
    * Must be called before init()!
    */
-  void addSystemParameter(Parameter* parameter);
+  void addSystemParameter(ConfigItem* parameter);
 
   /**
    * Getter for the actually configured thing name.
@@ -569,7 +572,7 @@ private:
   std::function<void()> _wifiConnectionCallback = NULL;
   std::function<void(int)> _configSavingCallback = NULL;
   std::function<void()> _configSavedCallback = NULL;
-  std::function<bool()> _formValidator = NULL;
+  std::function<bool(WebRequestWrapper* webRequestWrapper)> _formValidator = NULL;
   std::function<void(const char*, const char*)> _apConnectionHandler =
       &(IotWebConf::connectAp);
   std::function<void(const char*, const char*)> _wifiConnectionHandler =

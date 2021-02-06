@@ -17,7 +17,9 @@ __Contents__:
   - [PlatformIO](#using-iotwebconf-with-platformio)
   - [Compile time configuration](#compile-time-configuration)
   - [Groups and Parameters](#groups-and-parameters)
+  - [Optional and chained groups](#optional-and-chained-groups)
   - [Using System parameter-group](#using-system-parameter-group)
+  - [Alternative WiFi connection](#alternative-wifi-connection)
   - [Accessing system properties](#accessing-system-properties)
   - [Use custom style](#use-custom-style)
   - [Create your property class](#create-your-property-class)
@@ -58,6 +60,25 @@ With version 3.0.0 IotWebConf introduces individual parameter classes for
 each type, and you can organize your parameters into groups.
 You can also free to add groups into groups to make a tree hierarchy. 
 
+## Optional and chained groups
+With ```OptionalParameterGroup```, the group you have defined will have
+a special appearance in the config portal, as the fieldset in which the
+group items are shown can be hidden (inactive) / shown (active).
+
+E.g you want to create a group with property items, that are not mandatory,
+so you can hide these options in the config portal by default, and
+only reveal the contents, when it is strictly requested.
+There is a specific example covering this very feature under
+```IotWebConf13OptionalGroup```.
+
+```ChainedParameterGroup```s can be linked. One after another. The
+property sets will reveal on after another, when user requests is. The
+difference between ```OptionalParameterGroup``` and ```ChainedParameterGroup```
+is that second group item in a chained list can only be added, when
+the first item is already visible.
+There is a specific example covering this very feature under
+```IotWebConf14GroupChain```.
+
 ## Using system parameter-group
 By default, you should add your own parameter group, that will appear as
 a new field-set on the Config Portal. However, there is a special group
@@ -80,6 +101,21 @@ Example:
 
 There is another group "WiFi parameters" managed by IotWebConf, that
 can be retrieved by getWifiParameterGroup().
+
+## Alternative WiFi connection
+With v3.0.0 you can set up multiple WiFi connection by utilizing the
+MultipleWifiAddition class can be found in IotWebConfMultipleWifi.h .
+
+This class basically set up some handlers in iotWebConf to
+1. display optional WiFi settings in admin GUI,
+2. use these alternative settings in case previous WiFi connection
+attempts fails.
+
+The maximal number of connection settings are determined compile-time,
+as we want to avoid any dynamic memory allocations in Arduino.
+
+There is a complete example covering this topic, please visit example
+```IotWebConf15MultipleWifi```!
 
 ## Accessing system properties
 IotWebConf comes with some parameters, that are required for the basic
@@ -135,7 +171,7 @@ will be called, when a connection to a WiFi network failed (most likely
 timed out). Now, when you return with a new valid connection-info from
 your callback, IotWebConf will not fall back to AP mode, but try the
 connection you have just provided. With this method you can theoretically
-set up multiply WiFi networks for IotWebConf to try connect to after
+set up multiple WiFi networks for IotWebConf to try connect to after
 one-by-one if the previous one fails. Some days IotWebConf might also
 provide this feature out of the box.
 
